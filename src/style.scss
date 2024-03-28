@@ -1,0 +1,258 @@
+th, td{
+    vertical-align: baseline;
+}
+
+.header{
+    background-color: #000;
+}
+
+.title-section{
+    text-align: center;
+    padding: 10px;
+}
+
+.issue-create-section{
+    text-align: center;
+}
+
+.issue-form{
+    display: grid;
+    label{
+        display: flex;
+    }
+    select{
+        height: 30px;
+    }
+    button{
+        margin-top: 20px;
+        border-radius: 3px;
+    }
+}
+
+//// Sidebar
+
+*{
+    margin:0;
+    padding:0;
+    text-decoration: none !important;
+}
+.container-fluid{
+    display:flex;
+    padding: 0;
+    margin: 0;
+}
+// main{
+//     width: 100%;
+//     // padding: 20px;
+// }
+.sidebar{
+    background: #000;
+    color: #fff;
+    height: 100vh;
+    width: 200px;
+    transition: all .1s;
+}
+.top-section{
+    display: flex;
+    align-items:center;
+    padding:0px 20px 20px 20px;
+}
+.logo{
+    font-size: 30px;
+}
+.bars{
+    display: flex;
+    font-size: 25px;
+}
+.bars:hover{
+    background-color: #f7a156;
+    transition: all 0.2s;
+}
+
+.link{
+    display: flex;
+    color: #fff;
+    padding: 10px 15px;
+    gap: 15px;
+    margin-bottom: 2px;
+}
+.link:hover{
+    background:#f7a156;
+    color: #000;
+    transition: all 0.2s;
+}
+.active{
+    background: #f7a156;
+    color: #000;
+    text-decoration: none;
+}
+.icon, .link_text{
+    font-size: 20px;
+}
+
+.page-contents{
+    flex: 1;
+}
+
+.issue-create-form{
+    display: inline-flex;
+    width: 100%;
+    input{
+        width: 85%;
+        border-style: solid;
+        border-color: #000;
+        border-width: 1px 1px 1px 0px;
+    }
+    
+    select{
+        width: 15%;
+        border-style: solid;
+        border-color: #000;
+        border-width: 1px 0px 1px 1px;
+    }
+
+    input:focus, select:focus{
+        outline: none;
+    }
+}
+
+.issue-create-btn {
+    width: 100%;
+    padding: 0px 5px;
+    border-radius: 2px;
+}
+
+.issue-create-btn:hover{
+    background-color: green;
+    border-color: green;
+}
+
+
+.backlog-table{
+    overflow: auto;
+    max-height: 70vh;
+}
+
+.issue-name{
+    color: blue !important;
+    cursor: pointer;
+}
+
+.card{
+    flex: 1;
+    max-height: 70vh;
+    overflow-y: scroll;
+    border-left: 1px solid #0dcaf0;
+}
+
+.close-btn{
+    display: inline-block;
+    cursor: pointer;
+}
+
+.close-btn:hover{
+    background-color: #c1eff8;
+}
+
+
+.issue-no-td{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+.delete-btn {
+    display: inline-block;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    color: red;
+}
+
+.sprint-btn {
+    padding: 0px 5px;
+    border-radius: 2px;
+    cursor: pointer;
+    position: sticky;
+}
+
+.sprint-btn:hover {
+    background-color: green;
+    border-color: green;
+}
+
+
+.sprintForm{
+    display: grid;
+}
+
+.sprintForm:focus{
+    outline: none;
+}
+
+.sprint-submit-btn {
+    width: 100px;
+    padding: 0px 5px;
+    border-radius: 2px;
+    margin-top: 10px;
+    margin: 10px 0px 0px auto;
+}
+
+.sprint-submit-btn:hover {
+    background-color: green;
+    border-color: green;
+}
+
+.accordion-body {
+    padding: 0;
+}
+
+.accordion{
+    padding: 15px;
+}
+
+.accordion-item{
+    border: none;
+}
+
+.accordion-button{
+    padding: 0;
+    background-color: #c1eff8;
+}
+
+.accordion-button:focus{
+    border: none;
+    box-shadow: none;
+}
+
+.sprint-detail {
+    display: flex;
+    justify-content: space-between;
+    width: 95%;
+    padding: 5px;
+    align-items: baseline;
+}
+
+/* Custom styles for accordion button icon */
+.accordion-button::after {
+    content: '';
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M233.4 105.4c12.5-12.5 32.8-12.5 45.3 0l192 192c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L256 173.3 86.6 342.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3l192-192z'/%3E%3C/svg%3E");
+    width: 24px; /* Adjust width and height as needed */
+    height: 24px;
+    display: inline-block;
+    background-size: 14px;
+}
+
+.accordion-button:not(.collapsed)::after {
+    content: '';
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath d='M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z'/%3E%3C/svg%3E");
+    width: 24px; /* Adjust width and height as needed */
+    height: 24px;
+    display: inline-block;
+    background-size: 14px;
+    transform: rotate(0deg);
+}
+
+
