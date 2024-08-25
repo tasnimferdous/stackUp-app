@@ -20,6 +20,11 @@ export default function Sidebar({ children }) {
       path: "/backlog"
     },
     {
+      name: "Board",
+      icon: <InfoIcon />,
+      path: "/board"
+    },
+    {
       name: "About",
       icon: <InfoIcon />,
       path: "/about"

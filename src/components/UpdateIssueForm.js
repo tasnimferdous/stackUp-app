@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
 
-import {issueTypeList, workTypeList, userList, progressList} from './Variables';
+import {issueTypeList, workTypeList, userList} from './Variables';
 import FormOption from './FormOption';
 
-export default function UpdateIssueForm({currentIssue, issueList, setIssueList}) {
-    
+export default function UpdateIssueForm({currentIssue, sprintList, setSprintList, issueList, setIssueList, boardList}) {
     const [epicList, setEpicList] = useState(null);
-    const [sprintList, setSprintList] = useState(null);
+    const [progressList, setProgressList] = useState(null);
     const [formSubmit, setFormSubmit] = useState(false);
     const [loading, setLoading] = useState(true);
 
@@ -46,17 +45,17 @@ export default function UpdateIssueForm({currentIssue, issueList, setIssueList})
         const fetchData = async () => {
             try {
                 const epicResponse = await fetch("http://localhost:8080/stackUp/epic/getAll");
-                const sprintResponse = await fetch("http://localhost:8080/stackUp/sprint/getAll");
+                const progressResponse = await fetch("http://localhost:8080/stackUp/board/getAll");
                 if (!epicResponse.ok) {
                     throw new Error('Failed to fetch epic list');
                 }
-                if (!sprintResponse.ok) {
-                    throw new Error('Failed to fetch sprint list');
+                if (!progressResponse.ok) {
+                    throw new Error('Failed to fetch progress list');
                 }
                 const epicData = await epicResponse.json();
-                const sprintData = await sprintResponse.json();
+                const progressData = await progressResponse.json();
                 setEpicList(epicData);
-                setSprintList(sprintData);
+                setProgressList(progressData);
                 setLoading(false);
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -65,7 +64,7 @@ export default function UpdateIssueForm({currentIssue, issueList, setIssueList})
         };
 
         fetchData();
-    }, [formSubmit]);
+    }, []);
 
     useEffect(() => {
         const updateIssue = async () => {
@@ -74,39 +73,68 @@ export default function UpdateIssueForm({currentIssue, issueList, setIssueList})
                     const epicId = parseInt(formData.epic);
                     const sprintId = parseInt(formData.sprint);
                     const parentIssueId = parseInt(formData.parentIssue);
+                    const progressMapId = parseInt(formData.progressMap);
+    
+                    let updatedFormData = {...formData};
+    
                     if (formData.epic && !isNaN(epicId)) {
-                        formData.epic = {
-                            id: epicId
+                        updatedFormData.epic = {
+                            id: epicId,
                         };
                     }
                     if (formData.sprint && !isNaN(sprintId)) {
-                        formData.sprint = {
-                            id: sprintId
+                        updatedFormData.sprint = {
+                            id: sprintId,
                         };
                     }
                     if (formData.parentIssue && !isNaN(parentIssueId)) {
-                        formData.parentIssue = {
-                            id: parentIssueId
+                        updatedFormData.parentIssue = {
+                            id: parentIssueId,
                         };
                     }
-                    formData.point = parseInt(formData.point);
-                    
+                    if (formData.progressMap && !isNaN(progressMapId)) {
+                        updatedFormData.progressMap = {
+                            id: progressMapId,
+                        };
+                    }
+    
+                    updatedFormData.point = parseInt(formData.point);
+    
                     const response = await fetch("http://localhost:8080/stackUp/issue/update", {
                         method: "PUT",
                         headers: {
                             "Content-Type": "application/json",
                         },
-                        body: JSON.stringify(formData),
+                        body: JSON.stringify(updatedFormData),
                     });
     
                     if (!response.ok) {
                         throw new Error("Network response was not ok");
                     }
-    
+                    const responseData = await response.json();
+                    updatedFormData = {
+                        id:responseData.id || null,
+                        name: responseData.name || "",
+                        description: responseData.description || "",
+                        issueType: responseData.issueType || null,
+                        toDoType: responseData.toDoType || null,
+                        progressMap: responseData.progressMap || null,
+                        assignedTo: responseData.assignedTo || null,
+                        assignedBy: responseData.assignedBy || null,
+                        point: responseData.point || 0,
+                        epic: responseData.epic || null,
+                        parentIssue: responseData.parentIssue || null,
+                        sprint: responseData.sprint || null,
+                    };
+
                     const updatedIssueIndex = issueList.findIndex(issue => issue.id === formData.id);
                     const updatedIssueList = [...issueList];
-                    updatedIssueList[updatedIssueIndex] = formData;
+                    updatedIssueList[updatedIssueIndex] = updatedFormData;
                     setIssueList(updatedIssueList);
+                    
+                    setTimeout(() => {
+                        alert("Sprint Updated"); // Delayed alert
+                    }, 100);
     
                 } catch (error) {
                     console.error("Error updating issue:", error);
@@ -117,6 +145,7 @@ export default function UpdateIssueForm({currentIssue, issueList, setIssueList})
     
         updateIssue();
     }, [formSubmit, formData, issueList, setIssueList]);
+    
     
 
     function handleChange(event){
@@ -137,6 +166,7 @@ export default function UpdateIssueForm({currentIssue, issueList, setIssueList})
             console.log("Fill up the form properly");
         }
     }
+
 
     if (loading) {
         return;

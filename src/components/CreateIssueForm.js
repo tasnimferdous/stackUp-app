@@ -3,11 +3,12 @@ import { useEffect, useState } from 'react';
 import {issueTypeList} from './Variables';
 import FormOption from './FormOption';
 
-export default function CreateIssueForm({showItem, setShowItem, setIssueList}) {
+export default function CreateIssueForm({showItem, setShowItem, currentSprint, setIssueList}) {
     const [formSubmit, setFormSubmit] = useState(false);
     const [formData, setFormData] = useState({
         name:"",
-        issueType:null
+        issueType:null,
+        sprint:currentSprint
     });
 
     useEffect(() => {
@@ -35,7 +36,8 @@ export default function CreateIssueForm({showItem, setShowItem, setIssueList}) {
                     });
                     setFormData({
                         name:"",
-                        issueType:null
+                        issueType:null,
+                        sprint:currentSprint
                     });
                 }catch(error){
                     console.error("Error posting data: ", error);
@@ -45,7 +47,7 @@ export default function CreateIssueForm({showItem, setShowItem, setIssueList}) {
         };
 
         postData();
-    }, [formSubmit, formData, setIssueList])
+    }, [formSubmit, formData, setIssueList, currentSprint])
 
     function handleChange(event){
         const {name, value} = event.target;
@@ -60,11 +62,15 @@ export default function CreateIssueForm({showItem, setShowItem, setIssueList}) {
     function handleSubmit(event){
         if(event.key === "Enter"){
             event.preventDefault();
-            if(formData.name && formData.issueType){
-                setFormSubmit(true);
-                setShowItem(!setShowItem);
+            if(formData.sprint){
+                if(formData.name && formData.issueType){
+                    setFormSubmit(true);
+                    setShowItem(!setShowItem);
+                }else{
+                    console.log("Fill up the form properly!!");
+                }
             }else{
-                console.log("Fill up the form properly");
+                console.log("No sprint is created!!");
             }
         }
     }
@@ -86,6 +92,13 @@ export default function CreateIssueForm({showItem, setShowItem, setIssueList}) {
                     onChange={handleChange} 
                     onKeyDown={handleSubmit}
                     placeholder="Issue Name"
+                />
+                <input
+                    name="sprint"
+                    type="hidden"
+                    value={formData.sprint || ""}
+                    onChange={handleChange} 
+                    onKeyDown={handleSubmit}
                 />
             </form>
         </div>

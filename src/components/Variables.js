@@ -70,23 +70,3 @@ export const userList = [
         name:"SHEHROZE"
     }
 ];
-
-
-export const progressList = [
-    {
-        id: 1,
-        name:"TODO"
-    },
-    {
-        id: 2,
-        name:"INPROGRESS"
-    },
-    {
-        id: 3,
-        name:"READYTOTEST"
-    },
-    {
-        id: 4,
-        name:"DONE"
-    }
-]

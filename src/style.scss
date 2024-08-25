@@ -41,14 +41,12 @@ th, td{
     padding: 0;
     margin: 0;
 }
-// main{
-//     width: 100%;
-//     // padding: 20px;
-// }
+
 .sidebar{
     background: #000;
     color: #fff;
-    height: 100vh;
+    height: auto;
+    min-height: 100vh;
     width: 200px;
     transition: all .1s;
 }
@@ -138,7 +136,7 @@ th, td{
     cursor: pointer;
 }
 
-.card{
+.update-issue-card{
     flex: 1;
     max-height: 70vh;
     overflow-y: scroll;
@@ -255,4 +253,67 @@ th, td{
     transform: rotate(0deg);
 }
 
+.issue-filter-form{
+    display: grid;
+    input:focus{
+        outline: none;
+    }
+}
 
+.issue-filter-section{
+    text-align: center;
+}
+.issue-filter-btn {
+    width: 100%;
+    padding: 0px 5px;
+    border-radius: 2px;
+}
+
+.board-box {
+    display: flex;
+    width: 800px;
+    overflow: auto;
+    margin: auto;
+    max-height: 400px;
+    scrollbar-width: thin;
+}
+
+.board-card {
+    height: 400px;
+    width: 300px;
+    flex: 0 0 auto; /* Add this line */
+    margin-right: 10px; /* Optional: Add margin between cards */
+}
+
+.card-header{
+    display: flex;
+    justify-content: space-between;
+}
+
+.add-board{
+    font-size: 24px;
+    font-weight: 800;
+    height: 42px;
+    line-height: 0px;
+    padding-top: 0;
+    align-self: center;
+}
+
+.board-form {
+    width: 100%;
+    display: inline-grid;
+    input:focus{
+        outline: none;
+    }
+    textarea:focus{
+        outline: none;
+    }
+}
+
+
+
+.scroll-btn{
+    background-color: #0dcaf0;
+    width: 100px;
+    height: 50px;
+}
