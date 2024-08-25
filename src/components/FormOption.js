@@ -1,6 +1,6 @@
 export default function FormOption(props){
     if (!props.dataList) {
-        return;
+        return null;
     }
     return(
         <select 
@@ -14,7 +14,7 @@ export default function FormOption(props){
             props.dataList.map(data => (
                 <option
                 key={data.id}
-                value={props.name === "epic" || props.name === "parentIssue" || props.name === "sprint"?data.id : data.name}
+                value={props.name === "epic" || props.name === "parentIssue" || props.name === "sprint" || props.name === "progressMap" ? data.id : data.name}
                 >
                     {data.name}
                 </option>
