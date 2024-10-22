@@ -1,18 +1,20 @@
 import MenuIcon from '@mui/icons-material/Menu';
 import InfoIcon from '@mui/icons-material/Info';
 import HomeIcon from '@mui/icons-material/Home';
+import LogoutIcon from '@mui/icons-material/Logout';
 import LogoDevIcon from '@mui/icons-material/LogoDev';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
-export default function Sidebar({ children }) {
+export default function Sidebar({ setIsAuthenticated, children }) {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(true);
   const toggle = () => setIsOpen(!isOpen);
   const sideBarItems = [
     {
       name: "Dashboard",
       icon: <HomeIcon />,
-      path: "/"
+      path: "/dashboard"
     },
     {
       name: "Backlog",
@@ -30,12 +32,20 @@ export default function Sidebar({ children }) {
       path: "/about"
     }
   ]
+
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('isAuthenticated');
+    setIsAuthenticated(false);
+    navigate('/login');
+  };
+
   return (
     <div className='container-fluid'>
-      <div className="sidebar" style={{ width: isOpen ? "200px" : "50px", maxWidth: isOpen ? "200px" : "50px"}}>
-        <div className='top-section' style={{ paddingBottom: isOpen ? "" : "2px"}}>
+      <div className="sidebar" style={{ width: isOpen ? "200px" : "50px", maxWidth: isOpen ? "200px" : "50px" }}>
+        <div className='top-section' style={{ paddingBottom: isOpen ? "" : "2px" }}>
           <h1 className='logo' style={{ display: isOpen ? "block" : "none" }}>Logo</h1>
-          <div className='bars' style={{ marginLeft: isOpen ? "75px" : "-24px", padding: isOpen ? "0px":"10px 15px"}}>
+          <div className='bars' style={{ marginLeft: isOpen ? "75px" : "-24px", padding: isOpen ? "0px" : "10px 15px" }}>
             <MenuIcon onClick={toggle} />
           </div>
         </div>
@@ -53,6 +63,16 @@ export default function Sidebar({ children }) {
             </NavLink>
           ))
         }
+
+        <div className="logout" onClick={handleLogout}>
+          <div className="">
+            <LogoutIcon />
+          </div>
+          <div className="">
+            Logout
+          </div>
+        </div>
+
       </div>
       <div className="page-contents">{children}</div>
     </div>

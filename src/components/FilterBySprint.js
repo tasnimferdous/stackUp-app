@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
-export default function FilterBySprint({ showFilteredItem, setShowFilteredItem, setFilteredIssueList, setFilteredSprint }) {
+import { useNavigate } from 'react-router-dom';
+
+export default function FilterBySprint({ setIsAuthenticated, showFilteredItem, setShowFilteredItem, setFilteredIssueList, setFilteredSprint }) {
+    const navigate = useNavigate();
     const [formSubmit, setFormSubmit] = useState(false);
     const [clearedInput, setClearedInput] = useState(false);
     const [formData, setFormData] = useState({
@@ -9,6 +12,7 @@ export default function FilterBySprint({ showFilteredItem, setShowFilteredItem, 
     useEffect(() => {
         const postData = async () => {
             if (formSubmit) {
+                const token = localStorage.getItem('authToken');
                 try {
                     const dataToSend = { ...formData };
                     const url = clearedInput ? 'http://localhost:8080/stackUp/issue/getAll' : `http://localhost:8080/stackUp/issue/getBySprint?id=${dataToSend.id}`;
@@ -16,20 +20,36 @@ export default function FilterBySprint({ showFilteredItem, setShowFilteredItem, 
                         method: "GET",
                         headers: {
                             "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`,
                         },
                     });
+
+                    if (issueResponse.status === 401 || issueResponse.status === 403) {
+                        localStorage.removeItem('authToken');
+                        setIsAuthenticated(false);
+                        navigate('/login');
+                    }
+
                     if (!issueResponse.ok) {
                         throw new Error("Network response was not ok");
                     }
                     const issueData = await issueResponse.json();
                     await setFilteredIssueList(issueData);
+
                     if (!clearedInput) {
                         const sprintResponse = await fetch(`http://localhost:8080/stackUp/sprint/get?id=${dataToSend.id}`, {
                             method: "GET",
                             headers: {
                                 "Content-Type": "application/json",
+                                "Authorization": `Bearer ${token}`,
                             },
                         });
+
+                        if (sprintResponse.status === 401 || sprintResponse.status === 403) {
+                            localStorage.removeItem('authToken');
+                            setIsAuthenticated(false);
+                            navigate('/login');
+                        }
 
                         if (!sprintResponse.ok) {
                             // setFilteredSprint(null);

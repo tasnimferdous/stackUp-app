@@ -269,6 +269,10 @@ th, td{
     border-radius: 2px;
 }
 
+// ===========================================================
+// board css
+// ===========================================================
+
 .board-box {
     display: flex;
     width: 800px;
@@ -281,8 +285,8 @@ th, td{
 .board-card {
     height: 400px;
     width: 300px;
-    flex: 0 0 auto; /* Add this line */
-    margin-right: 10px; /* Optional: Add margin between cards */
+    flex: 0 0 auto;
+    margin-right: 10px;
 }
 
 .card-header{
@@ -310,10 +314,59 @@ th, td{
     }
 }
 
-
+.control-scroll {
+    width: 800px;
+    margin: 10px auto;
+    text-align: end;
+}
 
 .scroll-btn{
     background-color: #0dcaf0;
-    width: 100px;
+    width: 150px;
     height: 50px;
+    cursor: all-scroll !important;
+}
+
+// =======================================================
+// Login Page CSS
+// =======================================================
+
+.login-container {
+    height: 100vh;
+    align-content: space-evenly;
+}
+
+.login-form {
+    display: grid;
+    width: 320px;
+    margin: auto;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 8px 8px 10px rgba(236, 131, 10, 0.2);
+    form{
+        display: inline-grid;
+    }
+}
+
+.login-form input{
+    margin-bottom: 4px;
+}
+
+.logout{
+    display: flex;
+    color: #fff;
+    font-size: 20px;
+    padding: 10px 15px;
+    gap: 15px;
+    margin-bottom: 2px;
+    cursor: pointer;
+}
+
+.logout:hover {
+    color: #ff0000;
+    font-size: 21px;
+}
+
+.logout-btn {
+    display: block;
 }
