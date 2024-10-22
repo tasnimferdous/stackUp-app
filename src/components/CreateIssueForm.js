@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-
+import { useNavigate } from 'react-router-dom';
 import {issueTypeList} from './Variables';
 import FormOption from './FormOption';
 
-export default function CreateIssueForm({showItem, setShowItem, currentSprint, setIssueList}) {
+export default function CreateIssueForm({setIsAuthenticated, showItem, setShowItem, currentSprint, setIssueList}) {
+    const navigate = useNavigate();
     const [formSubmit, setFormSubmit] = useState(false);
     const [formData, setFormData] = useState({
         name:"",
@@ -14,6 +15,7 @@ export default function CreateIssueForm({showItem, setShowItem, currentSprint, s
     useEffect(() => {
         const postData = async () =>{
             if(formSubmit){
+                const token = localStorage.getItem('authToken');
                 try{
                     const dataToSend = { ...formData };
 
@@ -21,9 +23,15 @@ export default function CreateIssueForm({showItem, setShowItem, currentSprint, s
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`,
                         },
                         body: JSON.stringify(dataToSend),
                     });
+                    if (response.status === 401 || response.status === 403) {
+                        localStorage.removeItem('authToken');
+                        setIsAuthenticated(false);
+                        navigate('/login');
+                      }
                     if(!response.ok){
                         throw new Error("Network response was not ok");
                     }

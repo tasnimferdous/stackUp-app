@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Modal from 'react-bootstrap/Modal';
 
 
-export default function CreateSprint() {
+export default function CreateSprint({setIsAuthenticated}) {
+    const navigate = useNavigate();
     const [show, setShow] = useState(false);
     const [formSubmit, setFormSubmit] = useState(false);
 
@@ -38,6 +40,7 @@ export default function CreateSprint() {
     useEffect(() => {
         const postData = async () =>{
             if(formSubmit){
+                const token = localStorage.getItem('authToken');
                 try{
                     const dataToSend = { ...formData };
 
@@ -45,9 +48,17 @@ export default function CreateSprint() {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`,
                         },
                         body: JSON.stringify(dataToSend),
                     });
+
+                    if (response.status === 401 || response.status === 403) {
+                        localStorage.removeItem('authToken');
+                        setIsAuthenticated(false);
+                        navigate('/login');
+                    }
+
                     if(!response.ok){
                         throw new Error("Network response was not ok");
                     }

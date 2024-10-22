@@ -1,5 +1,6 @@
 import { Table } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import TitleSection from '../components/TitleSection';
 import Header from '../components/Header';
@@ -9,7 +10,8 @@ import CardComponent from '../components/CardComponent';
 import DeleteIssue from '../components/DeleteIssueComponent';
 import CreateSprint from '../components/CreateSprintComponent';
 
-export default function Backlog() {
+export default function Backlog({setIsAuthenticated}) {
+  const navigate = useNavigate();
   const [issueList, setIssueList] = useState([]);
   const [boardList, setBoardList] = useState(null);
   const [filteredIssueList, setFilteredIssueList] = useState([]);
@@ -35,10 +37,39 @@ export default function Backlog() {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchData = async () => {
+      const token = localStorage.getItem('authToken');
       try {
-        const issueResponse = await fetch("http://localhost:8080/stackUp/issue/getAll");
-        const sprintResponse = await fetch("http://localhost:8080/stackUp/sprint/getAll");
-        const boardResponse = await fetch("http://localhost:8080/stackUp/board/getAll");
+        const issueResponse = await fetch("http://localhost:8080/stackUp/issue/getAll", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+        const sprintResponse = await fetch("http://localhost:8080/stackUp/sprint/getAll", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+        const boardResponse = await fetch("http://localhost:8080/stackUp/board/getAll", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        if (issueResponse.status === 401 || issueResponse.status === 403 || 
+          sprintResponse.status === 401 || sprintResponse.status === 403 || 
+          boardResponse.status === 401 || boardResponse.status === 401
+        ) {
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('isAuthenticated');
+          setIsAuthenticated(false);
+          navigate('/login');
+        }
         if (!issueResponse.ok) {
           throw new Error('Failed to fetch issues');
         }
@@ -113,6 +144,7 @@ export default function Backlog() {
     return (day + "-" + month + "-" + year);
   }
 
+  console.log(issueList)
   if (loading) {
     return;
   }
@@ -122,7 +154,7 @@ export default function Backlog() {
       <div className='backlog'>
         <Header />
         <TitleSection title="Backlog" />
-        <CreateSprint />
+        <CreateSprint setIsAuthenticated={setIsAuthenticated} />
 
         <div className="accordion" id="accordionExample">
           <div className="accordion-item">
@@ -141,7 +173,7 @@ export default function Backlog() {
                 <div className='issue-table'>
                   <button className='btn btn-primary issue-create-btn' style={{ display: showItem ? "none" : "" }} onClick={handleCreateIssueButton}>Create Issue</button>
                   <div className="issue-create-section">
-                    <CreateIssueForm showItem={showItem} setShowItem={setShowItem} currentSprint={currentSprint} setIssueList={setIssueList} />
+                    <CreateIssueForm setIsAuthenticated = {setIsAuthenticated} showItem={showItem} setShowItem={setShowItem} currentSprint={currentSprint} setIssueList={setIssueList} />
                   </div>
                   <div className='backlog-view' style={{ display: showUpdateBox ? "flex" : "block", overflow: showUpdateBox ? "hidden" : "" }}>
                     <div className='backlog-table' style={{ width: showUpdateBox ? "50%" : "100%", transition: "all 1s" }}>
@@ -165,13 +197,13 @@ export default function Backlog() {
                           {
                             issueList && [...issueList].filter(issue => issue.sprint && issue.sprint.id === currentSprint.id).reverse().map((issue, index) => (
                               <tr key={index}>
-                                <td className='issue-no-td'> <DeleteIssue issueId={issue.id} issueList={issueList} setIssueList={setIssueList} /> <span className='issue-no'>{index + 1}</span></td>
+                                <td className='issue-no-td'> <DeleteIssue setIsAuthenticated={setIsAuthenticated} issueId={issue.id} issueList={issueList} setIssueList={setIssueList} /> <span className='issue-no'>{index + 1}</span></td>
                                 <td>{issue.sprint && issue.sprint.name}</td>
                                 <td>{issue.issueType}</td>
                                 <td className="issue-name" onClick={() => handleUpdateBox(issue)}>{issue.name}</td>
                                 <td>{issue.description}</td>
                                 <td>{issue.toDoType}</td>
-                                <td>{issue.assignedTo}</td>
+                                <td>{issue.assignedTo && issue.assignedTo.username}</td>
                                 <td>{issue.point}</td>
                                 <td>{issue.progressMap && issue.progressMap.name}</td>
                                 <td>{issue.epic && issue.epic.name}</td>
@@ -183,8 +215,8 @@ export default function Backlog() {
                       </Table>
                     </div>
                     {
-                      showUpdateBox && <CardComponent setShowUpdateBox={setShowUpdateBox} sprintList={sprintList} setSprintList={setSprintList} 
-                      currentIssue={currentIssue} issueList={issueList} setIssueList={setIssueList} boardList={boardList}/>
+                      showUpdateBox && <CardComponent setIsAuthenticated={setIsAuthenticated} setShowUpdateBox={setShowUpdateBox} sprintList={sprintList} setSprintList={setSprintList}
+                        currentIssue={currentIssue} issueList={issueList} setIssueList={setIssueList} boardList={boardList} />
                     }
                   </div>
                 </div>
@@ -244,12 +276,13 @@ export default function Backlog() {
                           {
                             filteredIssueList && [...filteredIssueList].reverse().map((issue, index) => (
                               <tr key={index}>
+                                <td className='issue-no-td'>{index + 1}</td>
                                 <td>{issue.sprint && issue.sprint.name}</td>
                                 <td>{issue.issueType}</td>
                                 <td style={{ fontWeight: 600 }}>{issue.name}</td>
                                 <td>{issue.description}</td>
                                 <td>{issue.toDoType}</td>
-                                <td>{issue.assignedTo}</td>
+                                <td>{issue.assignedTo && issue.assignedTo.username}</td>
                                 <td>{issue.point}</td>
                                 <td>{issue.progressMap && issue.progressMap.name}</td>
                                 <td>{issue.epic && issue.epic.name}</td>

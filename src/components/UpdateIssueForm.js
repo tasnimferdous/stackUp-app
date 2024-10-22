@@ -1,32 +1,35 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import {issueTypeList, workTypeList, userList} from './Variables';
+import { issueTypeList, workTypeList } from './Variables';
 import FormOption from './FormOption';
 
-export default function UpdateIssueForm({currentIssue, sprintList, setSprintList, issueList, setIssueList, boardList}) {
+export default function UpdateIssueForm({setIsAuthenticated, currentIssue, sprintList, setSprintList, issueList, setIssueList, boardList }) {
+    const navigate = useNavigate();
     const [epicList, setEpicList] = useState(null);
+    const [userList, setUserList] = useState([]);
     const [progressList, setProgressList] = useState(null);
     const [formSubmit, setFormSubmit] = useState(false);
     const [loading, setLoading] = useState(true);
 
     const [formData, setFormData] = useState({
-        id:null,
-        name:"",
-        description:"",
-        issueType:null,
-        toDoType:null,
-        progressMap:null,
-        assignedTo:null,
-        assignedBy:null,
-        point:0,
-        epic:null,
-        parentIssue:null,
-        sprint:null,
+        id: null,
+        name: "",
+        description: "",
+        issueType: null,
+        toDoType: null,
+        progressMap: null,
+        assignedTo: null,
+        assignedBy: null,
+        point: 0,
+        epic: null,
+        parentIssue: null,
+        sprint: null,
     });
 
     useEffect(() => {
         setFormData({
-            id:currentIssue.id || null,
+            id: currentIssue.id || null,
             name: currentIssue.name || "",
             description: currentIssue.description || "",
             issueType: currentIssue.issueType || null,
@@ -43,19 +46,57 @@ export default function UpdateIssueForm({currentIssue, sprintList, setSprintList
 
     useEffect(() => {
         const fetchData = async () => {
+            const token = localStorage.getItem('authToken');
             try {
-                const epicResponse = await fetch("http://localhost:8080/stackUp/epic/getAll");
-                const progressResponse = await fetch("http://localhost:8080/stackUp/board/getAll");
+                const epicResponse = await fetch("http://localhost:8080/stackUp/epic/getAll", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                });
+                const progressResponse = await fetch("http://localhost:8080/stackUp/board/getAll", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                });
+                const userResponse = await fetch("http://localhost:8080/stackUp/user/getAll", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`,
+                    },
+                });
+
+                if (epicResponse.status === 401 || epicResponse.status === 403 ||
+                    progressResponse.status === 401 || progressResponse.status === 403 ||
+                    userResponse.status === 401 || userResponse.status === 403
+                ) {
+                    localStorage.removeItem('authToken');
+                    localStorage.removeItem('isAuthenticated');
+                    setIsAuthenticated(false);
+                    navigate('/login');
+                }
+
                 if (!epicResponse.ok) {
                     throw new Error('Failed to fetch epic list');
                 }
                 if (!progressResponse.ok) {
                     throw new Error('Failed to fetch progress list');
                 }
+                if (!userResponse.ok) {
+                    throw new Error('Failed to fetch user list');
+                }
+
                 const epicData = await epicResponse.json();
                 const progressData = await progressResponse.json();
+                const userData = await userResponse.json();
+
                 setEpicList(epicData);
                 setProgressList(progressData);
+                setUserList(userData);
                 setLoading(false);
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -69,14 +110,17 @@ export default function UpdateIssueForm({currentIssue, sprintList, setSprintList
     useEffect(() => {
         const updateIssue = async () => {
             if (formSubmit) {
+                const token = localStorage.getItem('authToken');
                 try {
                     const epicId = parseInt(formData.epic);
                     const sprintId = parseInt(formData.sprint);
                     const parentIssueId = parseInt(formData.parentIssue);
                     const progressMapId = parseInt(formData.progressMap);
-    
-                    let updatedFormData = {...formData};
-    
+                    const assignedToId = parseInt(formData.assignedTo);
+                    const assignedById = parseInt(formData.assignedBy);
+
+                    let updatedFormData = { ...formData };
+
                     if (formData.epic && !isNaN(epicId)) {
                         updatedFormData.epic = {
                             id: epicId,
@@ -97,23 +141,43 @@ export default function UpdateIssueForm({currentIssue, sprintList, setSprintList
                             id: progressMapId,
                         };
                     }
-    
+                    if (formData.assignedTo && !isNaN(assignedToId)) {
+                        updatedFormData.assignedTo = {
+                            id: assignedToId,
+                        };
+                    }
+                    if (formData.assignedBy && !isNaN(assignedById)) {
+                        updatedFormData.assignedBy = {
+                            id: assignedById,
+                        };
+                    }
+
                     updatedFormData.point = parseInt(formData.point);
-    
+
+                    console.log("Update ", updatedFormData);
                     const response = await fetch("http://localhost:8080/stackUp/issue/update", {
                         method: "PUT",
                         headers: {
                             "Content-Type": "application/json",
+                            "Authorization": `Bearer ${token}`,
                         },
                         body: JSON.stringify(updatedFormData),
                     });
-    
+
+                    if (response.status === 401 || response.status === 403
+                    ) {
+                        localStorage.removeItem('authToken');
+                        localStorage.removeItem('isAuthenticated');
+                        setIsAuthenticated(false);
+                        navigate('/login');
+                    }
+
                     if (!response.ok) {
                         throw new Error("Network response was not ok");
                     }
                     const responseData = await response.json();
                     updatedFormData = {
-                        id:responseData.id || null,
+                        id: responseData.id || null,
                         name: responseData.name || "",
                         description: responseData.description || "",
                         issueType: responseData.issueType || null,
@@ -131,42 +195,41 @@ export default function UpdateIssueForm({currentIssue, sprintList, setSprintList
                     const updatedIssueList = [...issueList];
                     updatedIssueList[updatedIssueIndex] = updatedFormData;
                     setIssueList(updatedIssueList);
-                    
+
                     setTimeout(() => {
                         alert("Sprint Updated"); // Delayed alert
                     }, 100);
-    
+
                 } catch (error) {
                     console.error("Error updating issue:", error);
                 }
                 setFormSubmit(false);
             }
         };
-    
+
         updateIssue();
     }, [formSubmit, formData, issueList, setIssueList]);
-    
-    
 
-    function handleChange(event){
-        const {name, value} = event.target;
+
+
+    function handleChange(event) {
+        const { name, value } = event.target;
         setFormData(prevData => {
-            return{
+            return {
                 ...prevData,
-                [name] : value === ""? null: value,
+                [name]: value === "" ? null : value,
             };
         });
     }
 
-    function handleSubmit(event){
+    function handleSubmit(event) {
         event.preventDefault();
-        if(formData.name && formData.issueType){
+        if (formData.name && formData.issueType) {
             setFormSubmit(true);
-        }else{
+        } else {
             console.log("Fill up the form properly");
         }
     }
-
 
     if (loading) {
         return;
@@ -175,28 +238,28 @@ export default function UpdateIssueForm({currentIssue, sprintList, setSprintList
     return (
         <div className='issue-create-section'>
             <form className="issue-form" onSubmit={handleSubmit}>
-                <input 
+                <input
                     name="id"
                     type="hidden"
                     value={formData.id}
                 />
                 <label htmlFor='issueName'>Issue name</label>
-                <input 
+                <input
                     id='issueName'
                     name="name"
                     type="text"
                     value={formData.name}
-                    onChange={handleChange} 
+                    onChange={handleChange}
                     placeholder="Issue Name"
                 />
 
                 <label htmlFor='description'>Description</label>
-                <input 
+                <input
                     id='description'
                     name='description'
                     type="text"
                     value={formData.description}
-                    onChange={handleChange} 
+                    onChange={handleChange}
                     placeholder="Issue Description"
                 />
 
@@ -213,74 +276,74 @@ export default function UpdateIssueForm({currentIssue, sprintList, setSprintList
                 />
 
                 <label htmlFor="issue_type">Issue Type</label>
-                <FormOption 
-                    id="issue_type" 
-                    name="issueType" 
-                    value={formData.issueType || ""} 
+                <FormOption
+                    id="issue_type"
+                    name="issueType"
+                    value={formData.issueType || ""}
                     handleChange={handleChange}
                     dataList={issueTypeList}
                 />
 
                 <label htmlFor='to_do_type'>Work Type</label>
-                <FormOption 
-                    id="to_do_type" 
-                    name="toDoType" 
-                    value={formData.toDoType || ""} 
+                <FormOption
+                    id="to_do_type"
+                    name="toDoType"
+                    value={formData.toDoType || ""}
                     handleChange={handleChange}
                     dataList={workTypeList}
                 />
 
                 <label htmlFor='assigned_to'>Assigned To</label>
-                <FormOption 
-                    id="assigned_to" 
-                    name="assignedTo" 
-                    value={formData.assignedTo || ""} 
+                <FormOption
+                    id="assigned_to"
+                    name="assignedTo"
+                    value={formData.assignedTo || ""}
                     handleChange={handleChange}
                     dataList={userList}
                 />
 
                 <label htmlFor='assigned_by'>Assigned By</label>
-                <FormOption 
-                    id="assigned_by" 
-                    name="assignedBy" 
-                    value={formData.assignedBy || ""} 
+                <FormOption
+                    id="assigned_by"
+                    name="assignedBy"
+                    value={formData.assignedBy || ""}
                     handleChange={handleChange}
                     dataList={userList}
                 />
 
                 <label htmlFor='progress_map'>Work Progress</label>
-                <FormOption 
-                    id="progress_map" 
-                    name="progressMap" 
-                    value={formData.progressMap || ""} 
+                <FormOption
+                    id="progress_map"
+                    name="progressMap"
+                    value={formData.progressMap || ""}
                     handleChange={handleChange}
                     dataList={progressList}
                 />
 
 
                 <label htmlFor='epic_name'>Epic Name</label>
-                <FormOption 
-                    id="epic_name" 
-                    name="epic" 
-                    value={formData.epic || ""} 
+                <FormOption
+                    id="epic_name"
+                    name="epic"
+                    value={formData.epic || ""}
                     handleChange={handleChange}
                     dataList={epicList}
                 />
 
                 <label htmlFor='parent'>Parent Issue Name</label>
-                <FormOption 
-                    id="parent" 
-                    name="parentIssue" 
-                    value={formData.parentIssue || ""} 
+                <FormOption
+                    id="parent"
+                    name="parentIssue"
+                    value={formData.parentIssue || ""}
                     handleChange={handleChange}
                     dataList={issueList}
                 />
 
                 <label htmlFor='sprint'>Sprint Name</label>
-                <FormOption 
-                    id="sprint" 
-                    name="sprint" 
-                    value={formData.sprint || ""} 
+                <FormOption
+                    id="sprint"
+                    name="sprint"
+                    value={formData.sprint || ""}
                     handleChange={handleChange}
                     dataList={sprintList}
                 />

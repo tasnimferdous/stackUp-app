@@ -2,7 +2,7 @@ import CloseIcon from '@mui/icons-material/Close';
 
 import UpdateIssueForm from "./UpdateIssueForm";
 
-export default function CardComponent({setShowUpdateBox, sprintList, setSprintList, currentIssue, issueList, setIssueList, boardList}){
+export default function CardComponent({setIsAuthenticated, setShowUpdateBox, sprintList, setSprintList, currentIssue, issueList, setIssueList, boardList}){
     const closeUpdateBox = () => setShowUpdateBox(false);
 
     return(
@@ -12,7 +12,7 @@ export default function CardComponent({setShowUpdateBox, sprintList, setSprintLi
             </div>
             <div className="card-body">
                 <h5 className="card-title">Update Issue Form</h5>
-                <UpdateIssueForm currentIssue={currentIssue} sprintList={sprintList} setSprintList={setSprintList} issueList={issueList} setIssueList={setIssueList} boardList={boardList}/>
+                <UpdateIssueForm setIsAuthenticated={setIsAuthenticated} currentIssue={currentIssue} sprintList={sprintList} setSprintList={setSprintList} issueList={issueList} setIssueList={setIssueList} boardList={boardList}/>
             </div>
         </div>
     );
